@@ -120,15 +120,16 @@ seccion = st.sidebar.radio(
 if seccion == "Carátula":
     # ----- Edita estos datos con los de tu equipo -----
     INSTITUCION = "Universidad Privada del Norte"
+    FACULTAD = "Facultad de Ingeniería Industrial"
     CURSO = "Gestión Estratégica de Operaciones"
-    TITULO = "Elaboración del Dashboard a partir de la base de datos"
+    TITULO = "Elaboración del Dashboard a partir de la Base de Datos"
     INTEGRANTES = [
         "DIANA MARIBEL GARCIA SALAZAR",
         "YASSER ARAFAT LUQUE GARCIA",
         "ERIG JOHAN DIAZ PERALTA",
         "JOSUE EDUARDO RAVELLO YASAKA",
     ]
-    DOCENTE = "Aldo Guillermo Rivadeneyra Cuya"
+    DOCENTE = "ALDO GUILLERMO RIVADENEYRA CUYA"
     FECHA = "16 Noviembre del 2026"
     # --------------------------------------------------
 
@@ -136,6 +137,7 @@ if seccion == "Carátula":
     with centro:
         st.image("logo.png", width=320)
         st.markdown(f"<h3 style='text-align:center'>{INSTITUCION}</h3>", unsafe_allow_html=True)
+        st.markdown(f"<h5 style='text-align:center'>{FACULTAD}</h5>", unsafe_allow_html=True)
         st.markdown(f"<p style='text-align:center'>{CURSO}</p>", unsafe_allow_html=True)
         st.divider()
         st.markdown(f"<h1 style='text-align:center'>{TITULO}</h1>", unsafe_allow_html=True)
@@ -143,7 +145,8 @@ if seccion == "Carátula":
         st.markdown("<h4 style='text-align:center'>Integrantes</h4>", unsafe_allow_html=True)
         for nombre in INTEGRANTES:
             st.markdown(f"<p style='text-align:center'>{nombre}</p>", unsafe_allow_html=True)
-        st.markdown(f"<p style='text-align:center'><b>Docente:</b> {DOCENTE}</p>", unsafe_allow_html=True)
+        st.markdown("<h4 style='text-align:center'>Docente</h4>", unsafe_allow_html=True)
+        st.markdown(f"<p style='text-align:center'>{DOCENTE}</p>", unsafe_allow_html=True)
         st.markdown(f"<p style='text-align:center'>{FECHA}</p>", unsafe_allow_html=True)
 
 elif seccion == "Base de datos":
