@@ -102,7 +102,7 @@ st.markdown(
         border-left: 5px solid #FFC800;
         padding: 12px 16px;
         border-radius: 8px;
-    }
+    }[data-testid="stMetricValue"] { font-size: 1.5rem; }
     </style>
     """,
     unsafe_allow_html=True,
@@ -121,7 +121,7 @@ if seccion == "Carátula":
     # ----- Edita estos datos con los de tu equipo -----
     INSTITUCION = "Universidad Privada del Norte"
     CURSO = "Gestión Estratégica de Operaciones"
-    TITULO = "Elaboración del Dashbord a partir de la base de datos"
+    TITULO = "Elaboración del Dashboard a partir de la base de datos"
     INTEGRANTES = [
         "DIANA MARIBEL GARCIA SALAZAR",
         "YASSER ARAFAT LUQUE GARCIA",
@@ -196,7 +196,7 @@ elif seccion == "Base de datos":
     )
 
 else:
-    st.title("Panel de control")
+    st.title("Dashboard")
 
     # ----- Filtros en la barra lateral -----
     with st.sidebar:
