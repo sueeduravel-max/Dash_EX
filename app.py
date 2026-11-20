@@ -1,6 +1,12 @@
+import base64
+import os
+import time
+from io import BytesIO
+
 import pandas as pd
 import plotly.express as px
 import streamlit as st
+from PIL import Image, ImageEnhance, ImageFilter
 
 # ---------- Configuración de la página ----------
 st.set_page_config(
@@ -8,6 +14,210 @@ st.set_page_config(
     page_icon="logo.png",
     layout="wide",
 )
+
+COLOR_FONDO = "#0E1117"
+AMARILLO = "#FFC800"
+
+
+@st.cache_data
+def a_base64(ruta, blur=0, oscuro=0.0, version=0):
+    img = Image.open(ruta).convert("RGB")
+    img.thumbnail((1920, 1080))
+    if blur:
+        img = img.filter(ImageFilter.GaussianBlur(radius=blur))
+    if oscuro:
+        img = ImageEnhance.Brightness(img).enhance(1 - oscuro)
+    buf = BytesIO()
+    img.save(buf, format="JPEG", quality=78)
+    return base64.b64encode(buf.getvalue()).decode()
+
+
+# ---------- Quitar la barra superior y el botón "Deploy/Desplegar" ----------
+st.markdown("""
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&display=swap');
+
+  [data-testid="stHeader"] { background: transparent !important; }
+  [data-testid="stToolbar"],
+  [data-testid="stAppDeployButton"],
+  [data-testid="stDecoration"],
+  [data-testid="stStatusWidget"],
+  #MainMenu, footer { display: none !important; }
+
+  html, body { overflow-x: hidden; }
+  .block-container { padding-top: 1.2rem; }
+</style>
+""", unsafe_allow_html=True)
+
+
+# ---------- Portada ----------
+if "entrado" not in st.session_state:
+    st.session_state.entrado = False
+
+if not st.session_state.entrado:
+    fondo_b64 = a_base64("fondo.jpg", blur=2, oscuro=0.55,
+                         version=os.path.getmtime("fondo.jpg"))
+    logo_b64 = a_base64("logo.png")
+
+    st.markdown(
+        f"""
+        <style>
+          [data-testid="stApp"],
+          [data-testid="stAppViewContainer"],
+          [data-testid="stMain"] {{
+              background: transparent !important;
+          }}
+          [data-testid="stApp"]::before {{
+              content: "";
+              position: fixed;
+              inset: 0;
+              z-index: 0;
+              background: url(data:image/jpeg;base64,{fondo_b64}) center/cover no-repeat;
+          }}
+          [data-testid="stMainBlockContainer"] {{
+              position: relative;
+              z-index: 1;
+              padding-top: calc(50vh - 115px) !important;
+          }}
+          .caja-logo {{
+              display: flex;
+              justify-content: center;
+          }}
+          .caja-logo img {{
+              width: 230px;
+              border-radius: 12px;
+          }}
+          .titulo-portada {{
+              font-family: 'Cormorant Garamond', Georgia, serif;
+              font-size: clamp(12px, 1.6vw, 18px);
+              font-weight: 400;
+              letter-spacing: 8px;
+              text-transform: uppercase;
+              color: #ffffff;
+              text-align: center;
+              white-space: nowrap;
+              margin: 16px 0 24px;
+          }}
+          .stButton > button {{
+              background: {COLOR_FONDO};
+              color: #ffffff;
+              border: 1px solid {AMARILLO};
+              box-shadow: 0 0 14px rgba(255, 200, 0, 0.55);
+              letter-spacing: 3px;
+              font-weight: 600;
+          }}
+          .stButton > button:hover {{
+              background: #161a22;
+              color: #ffffff;
+              border-color: {AMARILLO};
+              box-shadow: 0 0 22px rgba(255, 200, 0, 0.85);
+          }}
+                    @keyframes aparecerSuave {{
+              from {{ opacity: 0; filter: blur(14px); transform: translate3d(0, 20px, 0); }}
+              to   {{ opacity: 1; filter: blur(0);    transform: translate3d(0, 0, 0); }}
+          }}
+          @keyframes aparecerFondo {{
+              from {{ opacity: 0; }}
+              to   {{ opacity: 1; }}
+          }}
+
+          [data-testid="stApp"]::before {{
+              animation: aparecerFondo 1.6s ease-out both;
+          }}
+          .caja-logo {{
+              animation: aparecerSuave 1.6s ease-out 0.3s both;
+          }}
+          .titulo-portada {{
+              animation: aparecerSuave 1.6s ease-out 0.9s both;
+          }}
+                    [data-testid="stHorizontalBlock"] {{
+              animation: aparecerSuave 1.6s ease-out 1.5s both;
+          }}
+          
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        f'<div class="caja-logo"><img src="data:image/png;base64,{logo_b64}"></div>',
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        '<div class="titulo-portada">Aplicación Dashboard</div>',
+        unsafe_allow_html=True,
+    )
+
+    _, centro, _ = st.columns([5, 2, 5])
+    with centro:
+        if st.button("ENTRAR", key="btn_entrar", width="stretch"):
+            # La portada se difumina y se desliza hacia arriba
+            st.markdown(
+                """
+                <style>
+                @keyframes salirPortada {
+                    to { opacity: 0; transform: translate3d(0, -80px, 0); filter: blur(14px); }
+                }
+                @keyframes salirFondo { to { opacity: 0; } }
+                [data-testid="stMainBlockContainer"] {
+                    animation: salirPortada 0.8s ease-in forwards;
+                }
+                [data-testid="stApp"]::before {
+                    animation: salirFondo 0.8s ease-in forwards;
+                }
+                </style>
+                """,
+                unsafe_allow_html=True,
+            )
+            time.sleep(0.8)
+            st.session_state.entrado = True
+            st.session_state.recien_entrado = True
+            st.rerun()
+
+    st.stop()
+
+
+# ---------- Aparición difuminada (cada vez que cambias de sección) ----------
+def transicion_suave(clave):
+    recien = st.session_state.pop("recien_entrado", False)
+    cambio = st.session_state.get("ultima_seccion") != clave
+    st.session_state.ultima_seccion = clave
+
+    if not (recien or cambio):
+        return  # al mover filtros no se repite la animación
+
+    # Nombre distinto en cada transición: así el navegador reinicia la animación
+    st.session_state.n_anim = st.session_state.get("n_anim", 0) + 1
+    n = st.session_state.n_anim
+
+    lateral = ""
+    if recien:  # el lateral solo entra al venir de la portada
+        lateral = f"""
+        @keyframes lateral{n} {{
+            from {{ opacity: 0; transform: translate3d(-24px, 0, 0); filter: blur(8px); }}
+            to   {{ opacity: 1; transform: translate3d(0, 0, 0); filter: blur(0); }}
+        }}
+        [data-testid="stSidebarContent"] {{
+            animation: lateral{n} 1.2s ease-out both;
+        }}
+        """
+
+    st.markdown(
+        f"""
+        <style>
+        @keyframes pagina{n} {{
+            from {{ opacity: 0; transform: translate3d(0, 40px, 0); filter: blur(12px); }}
+            to   {{ opacity: 1; transform: translate3d(0, 0, 0); filter: blur(0); }}
+        }}
+        [data-testid="stMainBlockContainer"] {{
+            animation: pagina{n} 1.4s ease-out both;
+        }}
+        {lateral}
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+# ---------- Fin portada ----------
 
 ARCHIVO_EXCEL = "Libro2_JR1_1.xlsx"
 HOJA = "BD FERREIN"
@@ -115,6 +325,7 @@ seccion = st.sidebar.radio(
     "Índice",
     ["Carátula", "Base de datos", "Dashboard"],
 )
+transicion_suave(seccion)
 
 # ---------- Contenido según la opción elegida ----------
 if seccion == "Carátula":
@@ -135,7 +346,6 @@ if seccion == "Carátula":
 
     izq, centro, der = st.columns([1, 3, 1])
     with centro:
-        st.image("logo.png", width=320)
         st.markdown(f"<h3 style='text-align:center'>{INSTITUCION}</h3>", unsafe_allow_html=True)
         st.markdown(f"<h5 style='text-align:center'>{FACULTAD}</h5>", unsafe_allow_html=True)
         st.markdown(f"<p style='text-align:center'>{CURSO}</p>", unsafe_allow_html=True)
