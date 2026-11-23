@@ -13,6 +13,7 @@ st.set_page_config(
     page_title="Ferreindustrias S.A.C.",
     page_icon="logo.png",
     layout="wide",
+    initial_sidebar_state="expanded",
 )
 
 COLOR_FONDO = "#0E1117"
@@ -38,8 +39,9 @@ st.markdown("""
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&display=swap');
 
   [data-testid="stHeader"] { background: transparent !important; }
-  [data-testid="stToolbar"],
+  [data-testid="stToolbarActions"],
   [data-testid="stAppDeployButton"],
+  [data-testid="stMainMenu"],
   [data-testid="stDecoration"],
   [data-testid="stStatusWidget"],
   #MainMenu, footer { display: none !important; }
